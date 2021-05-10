@@ -1,0 +1,241 @@
+---
+title: 'Project 2: Modeling, Testing, and Predicting Car Accident Outcomes'
+author: "Jane Stephens jks3288"
+date: '5/5/2021'
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+**The dataset I'm using contains car accident data, specifically health outcomes, based on aspects of the car accident. In this project, I will be focusing on response variable injSeverity, which is based on a scale of 1-6, where 0:none, 1:possible injury, 2:no incapacity, 3:incapacity, 4:killed, 5:unknown, 6:prior death. Most of the variables in this dataset only have two possible groupings, like whether an airbag deployed or not, whether a seatbelt was used or not, etc. I expect the airbag and seatbelt variables to be most significant on injSeverity, but am interested to see in how the age of the car and it's occupant affects injSeverity as well.**
+
+
+
+##MANOVA, ANOVA, t-tests
+```{r}
+#wrangling data to exclude "unknown" and "prior death" observations from response variable, creating a variable for the age of the car involved in the accident
+library(readxl)
+airbagdata <- read_excel("AirbagData.xlsx")
+
+airbagdata<- filter(airbagdata, injSeverity==0| injSeverity==1|injSeverity==2|injSeverity==3|injSeverity==4) %>% na.omit() %>% mutate(carage= yearacc - yearVeh) %>% mutate(injSeverity=as.numeric(injSeverity)) %>% slice(1:2500)
+
+
+#MANOVA
+manova(cbind(carage, ageOFocc)~injSeverity,data=airbagdata) %>% summary()
+
+#ANOVA
+summary(aov(carage~injSeverity,data=airbagdata))
+summary(aov(ageOFocc~injSeverity, data=airbagdata))
+
+#T-tests
+pairwise.t.test(airbagdata$carage, airbagdata$injSeverity, p.adj="none")
+pairwise.t.test(airbagdata$ageOFocc, airbagdata$injSeverity, p.adj="none")
+
+#Type-1 Error
+1-(0.95)^23
+
+#Bonferroni 
+0.05/23
+
+```
+
+
+##Randomization
+```{r}
+
+##HO: wearing seatbelt has no effect on inJseverity 
+##H1: wearing seatbelt affects injSeverity
+
+##mean difference in severity between seatbelt and no seatbelt 
+airbagdata%>%group_by(seatbelt)%>%summarize(means=mean(injSeverity, na.rm=T)) %>% summarize('meandiff'=diff(means))
+randomdist<- vector()
+for(i in 1:5000){
+  new<- data.frame(injSeverity=sample(airbagdata$injSeverity), seatbelt=airbagdata$seatbelt)
+  randomdist[i]<- mean(new[new$seatbelt=='belted',]$injSeverity)-mean(new[new$seatbelt=='none',]$injSeverity)
+}
+
+mean(randomdist > 0.5836575|randomdist < -0.5836575)
+ggplot(new,aes(injSeverity,fill=seatbelt))+geom_histogram(bins=4)+
+facet_wrap(~seatbelt,ncol=2)+theme(legend.position="none")
+
+```
+
+
+##Linear Regression Model
+```{r}
+library(sandwich)
+library(lmtest)
+##finding coefficients to use in regression
+fit<- lm(injSeverity ~ ageOFocc + seatbelt, data=airbagdata)
+summary(fit) ##controlling for age of the occupant, wearing a seatbelt is still significant in predicting injSeverity 
+
+#regression: injSeverity= 1.103455 + 0.010470(ageOFocc) +0.630720(seatbelt)
+ggplot(airbagdata, aes(y=injSeverity, x=ageOFocc, color=seatbelt)) + geom_point(aes(color=seatbelt)) + geom_smooth(method="lm")
+
+##checking assumptions of linearity, normality, and homoskedasticity
+bptest(fit)
+
+resids<-lm(injSeverity ~ ageOFocc + seatbelt, data=airbagdata)$residuals
+ggplot()+geom_histogram(aes(resids),bins=10)
+
+fitted<-lm(injSeverity ~ ageOFocc + seatbelt, data=airbagdata)$fitted.values
+fitvals<-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red')
+
+
+##recomputing with robust standard errors
+coeftest(fit, vcov=vcovHC(fit))[,1:2]
+```
+**Null1: Controlling for seatbelt, the age of the occupant is not significant in predicting injSeverity. 
+Null2: Controlling for age of the occupant, wearing a seatbelt is not significiant in predicting injSeverity. The p-value for ageOFocc, controlling for seatbelt is 8.08e-10, so it is significant, we reject the second null hypothesis.The p-value for seatbelt, controlling for ageOFocc is 2e-16, so it is signficant, and we also reject the first null hypothesis. Using the calculated coefficients, injSeverity can be predicted by injSeverity= 1.103455 + 0.010470(ageOFocc) +0.630720(seatbelt). Using the adjusted r squared value, 6.899% of the variance is explained by the model.The data was homoskedastic, demonstrated by a p-value of 0.9754. Looking at the other figures, the data looks does not look normally distributed, but it does look linear.**
+
+
+##Linear Regression with Bootstrapping
+```{r}
+samp_distn<-replicate(5000, { boot_dat<-boot_dat<-airbagdata[sample(nrow(airbagdata), replace=TRUE),]
+fit2<- glm(injSeverity ~ ageOFocc + seatbelt, data=airbagdata)
+coef(fit2) 
+})
+
+samp_distn%>%t%>%as.data.frame%>%gather%>%group_by(key)%>% summarize(lower=quantile(value,.025, na.rm = TRUE), upper=quantile(value,.975, na.rm = TRUE))
+```
+**Running the same linear regression with bootstrapped standard errors did not change the intercept or the coefficients for ageOFocc or seatbelt, which further demonstrates that the assumptions for the linear regression above were met.**
+
+##Logistic Regression predicting binary variable from 2 explanatory variables
+```{r}
+##Calculating coefficients
+airbagdata<- airbagdata %>% mutate(deadbi=ifelse(dead=="dead", 1, 0))
+
+fit<-glm(deadbi~carage+ageOFocc, data=airbagdata, family='binomial')
+summary(fit)
+coeftest(fit)
+exp(coef(fit)) 
+
+#equation: odds of death = 0.01510755 * 1.06311566^carage * 1.0295606^ageofocc
+
+##confusion matrix
+probs<-predict(fit,type="response")
+table(predict=as.numeric(probs>.5),truth=airbagdata$deadbi)%>%addmargins
+airbagdata$logit <-predict(fit,type="link")
+
+##TPR, TNR, PPV, AUC
+2367/2500 #accuracy
+0/133 #sensitivity tpr
+133/133 #specificity
+
+##density plot of logodds
+airbagdata%>%ggplot()+geom_density(aes(logit,color=dead,fill=dead), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab("logit (log-odds)")+
+  geom_rug(aes(logit,color=dead))
+
+##Roc
+library(plotROC) 
+roc<- ggplot(airbagdata) +geom_roc(aes(d=dead,m=probs), n.cuts=0)
+roc
+calc_auc(roc)
+```
+**The intercept is the predicted odds of death when carage and ageOFocc are 0. Every one unit increase in carage multiplies the odds of death by a factor 1.06311566; for every one unit increase in ageOFocc multiplies the odds of death by a factor of 1.0295606. The ROC curve doesn't tell us much because it plots sensitivity over specificity, and they are 0 and 1, respectively. The area underneath the ROC curve is the model's AUC, which how represents well the model predicts a that the car accident occupant died or not. In other words, the ROC curve visualizes the tradeoff between sensitivity and specificity.The AUC for this model is 0.6381432 which means it can accurately predict whether the occupant died or not 63.81% of the time, making it a poor predictor!**
+
+ 
+##Logistic Regression predicting same response from all explanatory variables
+```{r}
+airbagdata1<- airbagdata %>% mutate(dead=ifelse(dead=="dead",1,0))
+fit<- glm(dead~(.)^2, data=airbagdata1, family="binomial")
+coef(fit)
+
+class_diag<-function(probs,truth){
+  
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  prediction<-ifelse(probs>.5,1,0)
+  acc=mean(truth==prediction)
+  sens=mean(prediction[truth==1]==1)
+  spec=mean(prediction[truth==0]==0)
+  ppv=mean(truth[prediction==1]==1)
+  f1=2*(sens*ppv)/(sens+ppv)
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+# 10 fold CV 
+set.seed(1234)
+k = 10
+data <- airbagdata1[sample(nrow(airbagdata1)),]
+folds <- cut(seq(1:nrow(airbagdata1)),breaks=k,labels=F)
+
+diags<-NULL
+for(i in 1:k){
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  truth <- test$dead
+  fit <- glm(dead~., data = train, family = "binomial")
+  probs <- predict(fit, newdata = test, type="response")
+  diags <- rbind(diags, class_diag (probs,truth))
+}
+summarize_all(diags,mean)
+
+# LASSO
+library(glmnet)
+set.seed(1234)
+y <- as.matrix(airbagdata1$dead)
+x <- model.matrix(dead~., data = airbagdata1) %>% scale()
+
+
+##This is where I couldn't get it to work, I am commenting the rest out so the code I used is still there
+#cv <- cv.glmnet(x, y, family = "binomial")
+#lasso <- glmnet(x, y, family = "binomial", lambda = cv$lambda.1se)
+#coef(lasso)
+#set.seed(1234)
+#k=10
+#data <- lasso_data[sample(nrow(lasso_data)),]
+#folds <- cut(seq(1:nrow(lasso_data)),breaks=k,labels=F)
+#3diags<-NULL
+#for(i in 1:k){
+ # train<-data[folds!=i,] 
+ # test<-data[folds==i,]
+  #truth<-test$y 
+ # fit<-glm(y~., data=lasso_data, family="binomial")
+ # probs<-predict(fit,newdata = test,type="response")
+ # diags<-rbind(diags,class_diag(probs,truth))
+#}
+#summarize_all(diags,mean)
+```
+
+
+

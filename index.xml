@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jane Stephens</title>
+    <link>/</link>
+    <description>Recent content on Jane Stephens</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting Car Accident Outcomes</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>The dataset I’m using contains car accident data, specifically health outcomes, based on aspects of the car accident. In this project, I will be focusing on response variable injSeverity, which is based on a scale of 1-6, where 0:none, 1:possible injury, 2:no incapacity, 3:incapacity, 4:killed, 5:unknown, 6:prior death. Most of the variables in this dataset only have two possible groupings, like whether an airbag deployed or not, whether a seatbelt was used or not, etc.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/</guid>
+      <description> Check out some of my coding projects below:
+ Wrangling &amp;amp; Exploratory Data Analysis
+ Modeling, Inference, Prediction
+  -- </description>
+    </item>
+    
+    <item>
+      <title>Resume</title>
+      <link>/resume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/resume/</guid>
+      <description>    </description>
+    </item>
+    
+    <item>
+      <title>Survivor.Project1</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Introduction The show Survivor has been running since before I was born, and I have watched it with my mom since infancy. Throughout their 40 seasons, a number of “castaways” compete for $1 million dollars by surviving on an island, voting each other out. The dataset Castaways contains information for every contestant to ever play the game, and the dataset Viewers contains viewing information for each episode in each season.</description>
+    </item>
+    
+  </channel>
+</rss>

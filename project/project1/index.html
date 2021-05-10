@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Jane Stephens" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Survivor.Project1</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Survivor.Project1</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p><image src="https://upload.wikimedia.org/wikipedia/en/4/40/400px-Survivor.borneo.logo.png"></p>
+<p>The show Survivor has been running since before I was born, and I have watched it with my mom since infancy. Throughout their 40 seasons, a number of “castaways” compete for $1 million dollars by surviving on an island, voting each other out. The dataset Castaways contains information for every contestant to ever play the game, and the dataset Viewers contains viewing information for each episode in each season.
+I suspect that viewing on the final episodes, where the winner is revealed, will be higher than views of the premieres, but I also expect to see similar viewing trends across seasons– some seasons are genuinely more interesting than others! I’m also interested to see if there are any patterns between characteristics of each contestant, particularly the winners.</p>
+</div>
+<div id="joining" class="section level2">
+<h2>Joining</h2>
+<pre class="r"><code>library(tidyverse)
+
+library(readxl)
+castaways &lt;- read_excel(&quot;castaways.xlsx&quot;)
+
+library(readxl)
+viewers &lt;- read_excel(&quot;viewers.xlsx&quot;)
+
+survivor &lt;- castaways %&gt;% full_join(viewers, by = &quot;season&quot;)
+
+survivor %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 9,797
+## Columns: 26
+## $ season_name.x          &lt;chr&gt; &quot;Survivor: Winners at War&quot;, &quot;Survivor: Winners …
+## $ season                 &lt;dbl&gt; 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,…
+## $ full_name              &lt;chr&gt; &quot;Natalie Anderson&quot;, &quot;Natalie Anderson&quot;, &quot;Natali…
+## $ castaway               &lt;chr&gt; &quot;Natalie&quot;, &quot;Natalie&quot;, &quot;Natalie&quot;, &quot;Natalie&quot;, &quot;Na…
+## $ age                    &lt;dbl&gt; 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33,…
+## $ city                   &lt;chr&gt; &quot;Edgewater&quot;, &quot;Edgewater&quot;, &quot;Edgewater&quot;, &quot;Edgewat…
+## $ state                  &lt;chr&gt; &quot;New Jersey&quot;, &quot;New Jersey&quot;, &quot;New Jersey&quot;, &quot;New …
+## $ personality_type       &lt;chr&gt; &quot;ESTP&quot;, &quot;ESTP&quot;, &quot;ESTP&quot;, &quot;ESTP&quot;, &quot;ESTP&quot;, &quot;ESTP&quot;,…
+## $ day                    &lt;dbl&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3,…
+## $ order                  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2,…
+## $ result                 &lt;chr&gt; &quot;1st voted out&quot;, &quot;1st voted out&quot;, &quot;1st voted ou…
+## $ jury_status            &lt;chr&gt; &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;,…
+## $ original_tribe         &lt;chr&gt; &quot;Sele&quot;, &quot;Sele&quot;, &quot;Sele&quot;, &quot;Sele&quot;, &quot;Sele&quot;, &quot;Sele&quot;,…
+## $ merged_tribe           &lt;chr&gt; &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;,…
+## $ swapped_tribe          &lt;chr&gt; &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;,…
+## $ swapped_tribe2         &lt;chr&gt; &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;, &quot;NA&quot;,…
+## $ total_votes_received   &lt;dbl&gt; 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,…
+## $ immunity_idols_won     &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,…
+## $ season_name.y          &lt;chr&gt; &quot;Survivor: Winners at War&quot;, &quot;Survivor: Winners …
+## $ episode_number_overall &lt;chr&gt; &quot;583&quot;, &quot;584&quot;, &quot;585&quot;, &quot;587&quot;, &quot;588&quot;, &quot;589&quot;, &quot;590&quot;…
+## $ episode                &lt;dbl&gt; 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1, …
+## $ title                  &lt;chr&gt; &quot;Greatest of the Greats&quot;, &quot;It&#39;s Like a Survivor…
+## $ episode_date           &lt;dttm&gt; 2020-02-12, 2020-02-19, 2020-02-26, 2020-03-11…
+## $ viewers                &lt;chr&gt; &quot;6.68&quot;, &quot;7.16&quot;, &quot;7.14&quot;, &quot;6.91&quot;, &quot;7.83&quot;, &quot;8.18&quot;,…
+## $ rating_18_49           &lt;chr&gt; &quot;1.3&quot;, &quot;1.4&quot;, &quot;1.4&quot;, &quot;1.4&quot;, &quot;1.6&quot;, &quot;1.7&quot;, &quot;1.6&quot;…
+## $ share_18_49            &lt;chr&gt; &quot;7&quot;, &quot;7&quot;, &quot;7&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;7&quot;, &quot;6&quot;, &quot;7&quot;, &quot;6…</code></pre>
+<pre class="r"><code>survivor &lt;- survivor %&gt;% mutate_at(c(20, 24:26), as.numeric)</code></pre>
+<p><em>I used a full-join for these datasets because I am joining by one variable, and I plan on filtering the data and selecting particular variables in the wrangling section. Castaways has 663 observations of 18 variables, and Viewers has 591 observations of 9 variables. After this initial join, the resulting “survivor” dataset has 9737 observations of 26 variables, after removing all entries that contain “NA”. There are multiple identical variables in both datasets like episode name and episode number for both datasets, so I will need to remove those redundancies in the wrangling portion.</em></p>
+</div>
+<div id="tidying" class="section level2">
+<h2>Tidying</h2>
+<pre class="r"><code>survivor.long &lt;- survivor %&gt;% pivot_longer(c = contains(&quot;_tribe&quot;), 
+    names_to = &quot;category&quot;, values_to = &quot;value&quot;) %&gt;% separate(category, 
+    into = c(&quot;tribes&quot;))</code></pre>
+<p><em>my data were already tidy, so I used pivot_longer to combine the all of the tribe variables (original, merge, swap) into one “tribes” variable</em></p>
+</div>
+<div id="wrangling" class="section level2">
+<h2>Wrangling</h2>
+<pre class="r"><code># selecting chosen variables, arranging by result, filtering
+# types of result, creating variables for winner, runner-up,
+# and third place
+survivor.1 &lt;- survivor %&gt;% select(season, castaway, episode, 
+    episode_number_overall, personality_type, result, order, 
+    age, immunity_idols_won, total_votes_received, viewers, rating_18_49) %&gt;% 
+    arrange(viewers) %&gt;% filter(result != &quot;Eliminated&quot;) %&gt;% mutate(winner = (str_detect(result, 
+    &quot;\\bSole\\b&quot;))) %&gt;% mutate(runnerup = (str_detect(result, 
+    &quot;\\bRunner-up\\b&quot;)))
+
+# summaries
+survivor.1 %&gt;% summarize(n(), n_distinct(age), mean.age = mean(age, 
+    na.rm = TRUE), sd.age = sd(age, na.rm = TRUE), median.age = median(age, 
+    na.rm = TRUE))</code></pre>
+<pre><code>## # A tibble: 1 x 5
+##   `n()` `n_distinct(age)` mean.age sd.age median.age
+##   &lt;int&gt;             &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
+## 1  9557                48     33.4   10.1         31</code></pre>
+<pre class="r"><code>survivor.1 %&gt;% group_by(winner, runnerup) %&gt;% summarise(sum.votes = sum(total_votes_received, 
+    na.rm = T), sum.idols = sum(immunity_idols_won, na.rm = T))</code></pre>
+<pre><code>## # A tibble: 3 x 4
+## # Groups:   winner [2]
+##   winner runnerup sum.votes sum.idols
+##   &lt;lgl&gt;  &lt;lgl&gt;        &lt;dbl&gt;     &lt;dbl&gt;
+## 1 FALSE  FALSE        58072      2957
+## 2 FALSE  TRUE          2095       851
+## 3 TRUE   FALSE         1746       924</code></pre>
+<pre class="r"><code># matrix
+survivor.1 %&gt;% select(where(is.numeric)) %&gt;% cor(use = &quot;pair&quot;)</code></pre>
+<pre><code>##                              season       episode episode_number_overall
+## season                  1.000000000 -0.0517534112            0.999594195
+## episode                -0.051753411  1.0000000000           -0.023672055
+## episode_number_overall  0.999594195 -0.0236720549            1.000000000
+## order                   0.082153936 -0.0014199764            0.082701488
+## age                    -0.006704357  0.0038069428           -0.007342483
+## immunity_idols_won      0.015565555 -0.0007767081            0.015207804
+## total_votes_received    0.120374817 -0.0042775553            0.120448971
+## viewers                -0.889129705  0.0309432970           -0.891641513
+## rating_18_49           -0.780424760 -0.0599660568           -0.782723080
+##                               order          age immunity_idols_won
+## season                  0.082153936 -0.006704357       0.0155655548
+## episode                -0.001419976  0.003806943      -0.0007767081
+## episode_number_overall  0.082701488 -0.007342483       0.0152078041
+## order                   1.000000000 -0.013889609       0.5011851256
+## age                    -0.013889609  1.000000000      -0.0378685196
+## immunity_idols_won      0.501185126 -0.037868520       1.0000000000
+## total_votes_received    0.016602883  0.025986517      -0.0759597081
+## viewers                -0.078736988  0.014706344      -0.0046178396
+## rating_18_49           -0.045561662 -0.018379997      -0.0077819806
+##                        total_votes_received     viewers rating_18_49
+## season                          0.120374817 -0.88912970 -0.780424760
+## episode                        -0.004277555  0.03094330 -0.059966057
+## episode_number_overall          0.120448971 -0.89164151 -0.782723080
+## order                           0.016602883 -0.07873699 -0.045561662
+## age                             0.025986517  0.01470634 -0.018379997
+## immunity_idols_won             -0.075959708 -0.00461784 -0.007781981
+## total_votes_received            1.000000000 -0.11786645 -0.113425905
+## viewers                        -0.117866455  1.00000000  0.630745244
+## rating_18_49                   -0.113425905  0.63074524  1.000000000</code></pre>
+<p><em>I found it interesting that there were 44 distinct ages among the castaways, with an average age of 33.3, which makes sense to me given my experience in watching the show– while people of all ages compete for Survivor, it’s usually people in their 30’s.
+After grouping by the winners and runners-up, I generated summaries on the sum of votes they received in their time on the show, as well as the total immunity idols they won. It was interesting that a pattern of either high votes or high immunity idols (not both, or both low) was apparent even in the summary table; of course, it makes sense in the context of the show because winning an immunity idol negates the votes cast against you.</em></p>
+</div>
+<div id="data-visualization" class="section level2">
+<h2>Data Visualization</h2>
+<pre class="r"><code>library(ggplot2)
+survivor.1 %&gt;% select_if(is.numeric) %&gt;% cor(use = &quot;pair&quot;) %&gt;% 
+    as.data.frame %&gt;% rownames_to_column %&gt;% pivot_longer(-1) %&gt;% 
+    ggplot(aes(rowname, name, fill = value)) + geom_tile() + 
+    geom_text(aes(label = round(value, 2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + 
+    coord_fixed() + ggtitle(&quot;Correlation Heatmap&quot;) + scale_fill_gradient2(low = &quot;green&quot;, 
+    mid = &quot;yellow&quot;, high = &quot;cyan&quot;) + theme(axis.text.x = element_text(angle = -90, 
+    size = 10))</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## Castaway Results by Age
+ggplot(survivor.1, aes(age)) + geom_histogram(aes(fill = result), 
+    binwidth = 2.5) + ggtitle(&quot;Castaway Results by Age&quot;) + xlab(&quot;Castaway Age&quot;) + 
+    theme_minimal()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## Views by Episode
+
+survivor.1 %&gt;% ggplot(aes(season, viewers)) + geom_point(mapping = aes(season, 
+    viewers, color = episode), size = 1) + ggtitle(&quot;Views by Episode&quot;) + 
+    xlab(&quot;Episodes per Season&quot;) + ylab(&quot;Viewers&quot;) + theme_minimal()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" />
+*In the correlation heatmap, the only correlations of note were between season and episode number overall, which makes sense because as the seasonsget higher in number, so does the overall episode number.
+In the Castaway Results by Age chart, the largest count of castaways of the same age was in the 30-years-old range, and the largest proportion of mid-level results also appear to be in this region. I had hoped to see a clear trend indicating if a certain age-group did better in the competition overall, but no such pattern is clear.
+The Views by episode plot is very interesting because there is a very obvious period where the show was super popular, one episode, “Final Four” of Season 1, episode 13 having a value of 51.6, indicating that 51.6% of Americans with their cable TV on while this was airing were watching Survivor. Viewership has seen a decline in the last decade, but it’s stagnating, and the variance in views between episodes is getting smaller, indicating to me that while few people (like me) still watch this show, they do so religiously!</p>
+<p>##Dimensionality Reduction</p>
+<pre class="r"><code>library(cluster)
+survivor.numeric &lt;- survivor.1 %&gt;% select(season, age, viewers) %&gt;% 
+    scale()
+sil_width &lt;- vector()
+for (i in 2:5) {
+    pam_fit &lt;- pam(survivor.numeric, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:5, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:5)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## scaling data and applying k
+pam1 &lt;- survivor.numeric %&gt;% scale() %&gt;% pam(k = 2)
+pam1</code></pre>
+<pre><code>## Medoids:
+##        ID     season        age    viewers
+## [1,] 2667  0.7635839 -0.1407669 -0.6514583
+## [2,] 9355 -1.1013500 -0.3385193         NA
+## Clustering vector:
+##   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 9457 entries ]
+## Objective function:
+##    build     swap 
+## 1.165497 1.043689 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code>## HERE IS WHERE IT STOPS KNITTING. I&#39;ve commented out
+## everything after this line so I can still send you the
+## knitted file, but I give up!
+
+# pamcluster&lt;-survivor.numeric%&gt;% mutate(survivor.numeric,
+# cluster=as.numeric(pam1$clustering))
+
+# pamcluster %&gt;%
+# ggplot(aes(season,viewers,color=cluster))+geom_point() +
+# xlab(&#39;Season&#39;) + ylab(&#39;Viewers (&#39;) + ggtitle(&#39;Cluster Plot
+# of Viewers&#39;)
+
+## cluster summary pamcluster%&gt;%
+## group_by(cluster)%&gt;%summarize_if(is.numeric,mean,na.rm=T)
+
+## visualizing clusters library(GGally) ggpairs(pamcluster,
+## columns=1:4, aes(color=cluster))</code></pre>
+<p>*After plotting k with sil_width, 2 clusters fit best; likely because there is a gap in viewer data between seasons 16 and 19. Because of this apparent gap, there is no overlap at all between the clusters. The age variable for both clusters is very similar, which is to be expected since there is no reason to believe the average ages of the contestants would significantly change over the seasons. If there weren’t a gap in the viewer seasons, it would be interesting to see how the clustering would have been affected.</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
